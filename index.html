@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinSmart - Free Personal Finance Tracker</title>
+    <meta name="description" content="Free tool to track expenses, create budgets, and achieve financial goals. No signup required.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Add Chart.js library BEFORE your script -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+    --primary: #2E5BFF;
+    --primary-dark: #1A3FC3;
+    --secondary: #00C9A7;
+    --danger: #FF4757;
+    --warning: #FFB800;
+    --success: #2ED573;
+    --dark: #2C3E50;
+    --light: #F8F9FA;
+    --gray: #6C757D;
+    --border: #E9ECEF;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --radius: 10px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    color: var(--dark);
+    line-height: 1.6;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Typography */
+h1, h2, h3, h4 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+h2 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+p {
+    margin-bottom: 1rem;
+    color: var(--gray);
+}
+
+.highlight {
+    color: var(--primary);
+    position: relative;
+}
+
+.highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: rgba(46, 91, 255, 0.2);
+    z-index: -1;
+}
+
+/* Buttons */
+.btn-primary, .btn-secondary, .btn-cta {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.btn-secondary:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-cta {
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    color: white;
+    font-size: 1.2rem;
+    padding: 16px 32px;
+    box-shadow: var(--shadow);
+}
+
+.btn-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(46, 91, 255, 0.3);
+}
+
+/* Navigation */
+.navbar {
+    background: white;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 1rem 0;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+.logo i {
+    font-size: 2rem;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--dark);
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: var(--primary);
+}
+
+.menu-toggle {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* Hero Section */
+.hero {
+    padding: 5rem 0;
+    background: white;
+}
+
+.hero .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--gray);
+    margin-bottom: 2rem;
+}
+
+.hero-stats {
+    display: flex;
+    gap: 3rem;
+    margin: 2rem 0;
+}
+
+.stat h3 {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.stat p {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.dashboard-preview {
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transform: perspective(1000px) rotateY(-10deg);
+    transition: transform 0.5s;
+}
+
+.dashboard-preview:hover {
+    transform: perspective(1000px) rotateY(0deg);
+}
+
+.dashboard-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Problem Section */
+.problem-section {
+    padding: 5rem 0;
+    background: var(--light);
+}
+
+.problem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.problem-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s;
+}
+
+.problem-card:hover {
+    transform: translateY(-5px);
+}
+
+.problem-icon {
+    font-size: 3rem;
+    color: var(--danger);
+    margin-bottom: 1rem;
+}
+
+/* Tracker Section */
+.tracker-section {
+    padding: 5rem 0;
+}
+
+.section-subtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--gray);
+    margin-bottom: 3rem;
+}
+
+.tracker-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.input-card, .summary-card, .transactions-card, .chart-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.budget-bar {
+    height: 10px;
+    background: var(--border);
+    border-radius: 5px;
+    margin: 1rem 0;
+    overflow: hidden;
+}
+
+.budget-progress {
+    height: 100%;
+    background: var(--success);
+    width: 75%;
+    transition: width 0.5s;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.summary-item {
+    padding: 1rem;
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+.summary-item.income {
+    background: rgba(46, 204, 113, 0.1);
+    border: 2px solid var(--success);
+}
+
+.summary-item.expense {
+    background: rgba(255, 71, 87, 0.1);
+    border: 2px solid var(--danger);
+}
+
+.summary-item.balance {
+    background: rgba(46, 91, 255, 0.1);
+    border: 2px solid var(--primary);
+}
+
+.transaction-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.filter-btn {
+    padding: 6px 12px;
+    border: 2px solid var(--border);
+    background: white;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.transactions-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+.transaction-type.income {
+    color: var(--success);
+}
+
+.transaction-type.expense {
+    color: var(--danger);
+}
+
+.chart-container {
+    height: 250px;
+    margin-top: 1rem;
+    position: relative;
+}
+
+/* Calculator Section */
+.calculator-section {
+    padding: 5rem 0;
+    background: var(--light);
+}
+
+.calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.calculator-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.calculator-card .result {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--light);
+    border-radius: var(--radius);
+    border-left: 4px solid var(--primary);
+}
+
+/* Tips Section */
+.tips-section {
+    padding: 5rem 0;
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.tip-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.tip-number {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-bottom-left-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* CTA Section */
+.cta-section {
+    padding: 5rem 0;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    text-align: center;
+}
+
+.cta-section h2, .cta-section p {
+    color: white;
+}
+
+.cta-section .btn-cta {
+    background: white;
+    color: var(--primary);
+    margin-top: 2rem;
+}
+
+.cta-section .btn-cta:hover {
+    background: var(--light);
+}
+
+.small-note {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Footer */
+.footer {
+    background: var(--dark);
+    color: white;
+    padding: 3rem 0 1.5rem;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+    margin-bottom: 2rem;
+}
+
+.footer-section h4 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-section a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-section a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.disclaimer {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    background: var(--dark);
+    color: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1001;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .hero .container,
+    .tracker-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .problem-grid,
+    .calculator-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .tips-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    h2 {
+        font-size: 2rem;
+    }
+    
+    .nav-links {
+        display: none;
+    }
+    
+    .menu-toggle {
+        display: block;
+    }
+    
+    .problem-grid,
+    .calculator-grid,
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+</style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <!-- FIXED: Logo now has click handler -->
+            <div class="logo" id="homeLogo">
+                <i class="fas fa-chart-line"></i>
+                <span>FinSmart</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#problem-statement">Features</a></li>
+                <li><a href="#tracker">Tracker</a></li>
+                <li><a href="#calculator">Calculators</a></li>
+                <li><a href="#tips">Tips</a></li>
+                <li><button class="btn-primary" id="exportBtn">Export Data</button></li>
+            </ul>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Take Control of Your <span class="highlight">Finances</span> Today</h1>
+                <p class="subtitle">Free, privacy-focused financial tracking tool that helps you save money, reduce debt, and achieve your financial goals</p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <h3>50,000+</h3>
+                        <p>Users Tracked</p>
+                    </div>
+                    <div class="stat">
+                        <h3>$2.1M+</h3>
+                        <p>Total Savings</p>
+                    </div>
+                    <div class="stat">
+                        <h3>94%</h3>
+                        <p>Report Better Control</p>
+                    </div>
+                </div>
+                <button class="btn-cta" id="startTracking">
+                    <i class="fas fa-play-circle"></i> Start Tracking Free
+                </button>
+            </div>
+            <div class="hero-image">
+                <div class="dashboard-preview">
+                    <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Finance Dashboard">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Problem Statement -->
+    <section class="problem-section" id="problem-statement">
+        <div class="container">
+            <h2>Struggling with Money Management?</h2>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Living Paycheck to Paycheck</h3>
+                    <p>62% of Americans have less than $1000 in savings for emergencies</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h3>Credit Card Debt</h3>
+                    <p>Average household carries $6,270 in credit card debt</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>No Budget Tracking</h3>
+                    <p>Only 32% of households maintain a monthly budget</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Finance Tracker -->
+    <section class="tracker-section" id="tracker">
+        <div class="container">
+            <h2>Your Personal Finance Tracker</h2>
+            <p class="section-subtitle">Track income and expenses in real-time. No registration required.</p>
+            
+            <div class="tracker-container">
+                <div class="input-section">
+                    <div class="input-card">
+                        <h3><i class="fas fa-plus-circle"></i> Add Transaction</h3>
+                        <div class="form-group">
+                            <label for="transactionType">Type</label>
+                            <select id="transactionType">
+                                <option value="expense">Expense</option>
+                                <option value="income">Income</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category">
+                                <option value="food">Food & Dining</option>
+                                <option value="transport">Transportation</option>
+                                <option value="housing">Housing</option>
+                                <option value="utilities">Utilities</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="health">Healthcare</option>
+                                <option value="shopping">Shopping</option>
+                                <option value="salary">Salary</option>
+                                <option value="freelance">Freelance</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">Amount ($)</label>
+                            <input type="number" id="amount" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <input type="text" id="description" placeholder="What was this for?">
+                        </div>
+                        <button class="btn-primary" id="addTransaction">
+                            <i class="fas fa-plus"></i> Add Transaction
+                        </button>
+                    </div>
+
+                    <!-- Budget Setter -->
+                    <div class="input-card">
+                        <h3><i class="fas fa-bullseye"></i> Set Monthly Budget</h3>
+                        <div class="form-group">
+                            <label for="monthlyBudget">Budget Amount ($)</label>
+                            <input type="number" id="monthlyBudget" min="0" step="10" value="3000">
+                        </div>
+                        <button class="btn-secondary" id="setBudget">
+                            Update Budget
+                        </button>
+                        <div class="budget-display">
+                            <p>Remaining: <span id="remainingBudget">$3,000.00</span></p>
+                            <div class="budget-bar">
+                                <div class="budget-progress" id="budgetProgress"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="display-section">
+                    <!-- Summary -->
+                    <div class="summary-card">
+                        <h3><i class="fas fa-chart-bar"></i> Financial Summary</h3>
+                        <div class="summary-grid">
+                            <div class="summary-item income">
+                                <h4>Total Income</h4>
+                                <p id="totalIncome">$0.00</p>
+                            </div>
+                            <div class="summary-item expense">
+                                <h4>Total Expenses</h4>
+                                <p id="totalExpense">$0.00</p>
+                            </div>
+                            <div class="summary-item balance">
+                                <h4>Current Balance</h4>
+                                <p id="currentBalance">$0.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction List -->
+                    <div class="transactions-card">
+                        <h3><i class="fas fa-list"></i> Recent Transactions</h3>
+                        <div class="transaction-filters">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="income">Income</button>
+                            <button class="filter-btn" data-filter="expense">Expenses</button>
+                        </div>
+                        <div class="transactions-list" id="transactionsList">
+                            <p class="empty-state">No transactions yet. Add your first transaction!</p>
+                        </div>
+                    </div>
+
+                    <!-- Visualization -->
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-pie"></i> Expense Breakdown</h3>
+                        <div class="chart-container">
+                            <canvas id="expenseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Financial Calculators -->
+    <section class="calculator-section" id="calculator">
+        <div class="container">
+            <h2>Financial Calculators</h2>
+            <p class="section-subtitle">Plan your financial future with our free calculators</p>
+            
+            <div class="calculator-grid">
+                <div class="calculator-card">
+                    <h3><i class="fas fa-calculator"></i> Debt Payoff Calculator</h3>
+                    <div class="form-group">
+                        <label>Total Debt ($)</label>
+                        <input type="number" id="debtAmount" value="10000">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Payment ($)</label>
+                        <input type="number" id="monthlyPayment" value="300">
+                    </div>
+                    <div class="form-group">
+                        <label>Interest Rate (%)</label>
+                        <input type="number" id="interestRate" value="12" step="0.1">
+                    </div>
+                    <button class="btn-secondary" id="calculateDebt">Calculate</button>
+                    <div class="result" id="debtResult">
+                        <p>Time to payoff: <strong>36 months</strong></p>
+                        <p>Total interest: <strong>$1,250</strong></p>
+                    </div>
+                </div>
+
+                <div class="calculator-card">
+                    <h3><i class="fas fa-piggy-bank"></i> Savings Goal Calculator</h3>
+                    <div class="form-group">
+                        <label>Goal Amount ($)</label>
+                        <input type="number" id="goalAmount" value="5000">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Savings ($)</label>
+                        <input type="number" id="monthlySavings" value="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Savings ($)</label>
+                        <input type="number" id="currentSavings" value="500">
+                    </div>
+                    <button class="btn-secondary" id="calculateSavings">Calculate</button>
+                    <div class="result" id="savingsResult">
+                        <p>Time to goal: <strong>22 months</strong></p>
+                        <p>Total saved: <strong>$5,000</strong></p>
+                    </div>
+                </div>
+
+                <div class="calculator-card">
+                    <h3><i class="fas fa-home"></i> Mortgage Calculator</h3>
+                    <div class="form-group">
+                        <label>Loan Amount ($)</label>
+                        <input type="number" id="loanAmount" value="300000">
+                    </div>
+                    <div class="form-group">
+                        <label>Interest Rate (%)</label>
+                        <input type="number" id="mortgageRate" value="4.5" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Loan Term (years)</label>
+                        <input type="number" id="loanTerm" value="30">
+                    </div>
+                    <button class="btn-secondary" id="calculateMortgage">Calculate</button>
+                    <div class="result" id="mortgageResult">
+                        <p>Monthly payment: <strong>$1,520</strong></p>
+                        <p>Total interest: <strong>$247,220</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Financial Tips -->
+    <section class="tips-section" id="tips">
+        <div class="container">
+            <h2>Proven Financial Tips</h2>
+            <p class="section-subtitle">Actionable advice to improve your financial health</p>
+            
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-number">01</div>
+                    <h3>50/30/20 Rule</h3>
+                    <p>Allocate 50% to needs, 30% to wants, and 20% to savings and debt repayment.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-number">02</div>
+                    <h3>Automate Savings</h3>
+                    <p>Set up automatic transfers to savings accounts right after payday.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-number">03</div>
+                    <h3>Emergency Fund First</h3>
+                    <p>Build 3-6 months of living expenses before aggressive investing.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-number">04</div>
+                    <h3>Track Every Dollar</h3>
+                    <p>Use this tool daily for 30 days to identify spending leaks.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Start Your Journey to Financial Freedom</h2>
+            <p>Join thousands who've taken control of their finances. It's free, private, and takes 2 minutes to start.</p>
+            <button class="btn-cta" id="saveDataBtn">
+                <i class="fas fa-download"></i> Save Your Data Locally
+            </button>
+            <p class="small-note"><i class="fas fa-lock"></i> Your data never leaves your browser. 100% private.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <!-- Footer logo also clickable -->
+                    <div class="logo" id="footerLogo">
+                        <i class="fas fa-chart-line"></i>
+                        <span>FinSmart by Fatima</span>
+                    </div>
+                    <p>Free financial tools for everyone. No subscriptions. No ads. Just empowerment.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#tracker">Finance Tracker</a></li>
+                        <li><a href="#calculator">Calculators</a></li>
+                        <li><a href="#tips">Financial Tips</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Tools</h4>
+                    <ul>
+                        <li><a href="#" id="clearData">Clear All Data</a></li>
+                        <li><a href="#" id="printReport">Print Report</a></li>
+                        <li><a href="#" id="exportCSV">Export CSV</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 FinSmart by Fatima. All rights reserved. | Made with <i class="fas fa-heart"></i> to help people</p>
+                <p class="disclaimer">This tool is for educational purposes. Consult a financial advisor for professional advice.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+// Initialize Chart.js
+let expenseChart = null;
+
+// Sample data structure
+let financialData = {
+    transactions: [],
+    monthlyBudget: 3000,
+    categories: {
+        food: 0,
+        transport: 0,
+        housing: 0,
+        utilities: 0,
+        entertainment: 0,
+        health: 0,
+        shopping: 0,
+        salary: 0,
+        freelance: 0,
+        other: 0
+    }
+};
+
+// Track active filter for transactions
+let activeTransactionFilter = 'all';
+
+// FIX: Logo click handler - reloads page
+document.getElementById('homeLogo').addEventListener('click', function() {
+    // Option 1: Reload the page completely
+    location.reload();
+    
+    // Option 2: Scroll to top (if you prefer not to reload)
+    // window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Also make footer logo clickable
+document.getElementById('footerLogo').addEventListener('click', function() {
+    location.reload();
+});
+
+// Load data from localStorage
+function loadData() {
+    const savedData = localStorage.getItem('finSmartData');
+    if (savedData) {
+        financialData = JSON.parse(savedData);
+        showToast('Data loaded successfully!', 'success');
+    }
+    updateUI();
+}
+
+// Save data to localStorage
+function saveData() {
+    localStorage.setItem('finSmartData', JSON.stringify(financialData));
+    showToast('Data saved locally!', 'success');
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast show';
+    
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 3000);
+}
+
+// "Start Tracking Free" button functionality
+document.getElementById('startTracking')?.addEventListener('click', function() {
+    document.getElementById('tracker').scrollIntoView({ behavior: 'smooth' });
+});
+
+// Add transaction
+document.getElementById('addTransaction')?.addEventListener('click', function() {
+    const type = document.getElementById('transactionType').value;
+    const category = document.getElementById('category').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const description = document.getElementById('description').value.trim();
+    
+    if (!amount || amount <= 0 || !description) {
+        showToast('Please enter valid amount and description', 'error');
+        return;
+    }
+    
+    const transaction = {
+        id: Date.now(),
+        type,
+        category,
+        amount,
+        description,
+        date: new Date().toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
+    };
+    
+    financialData.transactions.unshift(transaction);
+    
+    // Update category totals - Only for expenses
+    if (type === 'expense') {
+        financialData.categories[category] = (financialData.categories[category] || 0) + amount;
+    }
+    
+    updateUI();
+    saveData();
+    showToast('Transaction added successfully!', 'success');
+    
+    // Clear form
+    document.getElementById('amount').value = '';
+    document.getElementById('description').value = '';
+});
+
+// Set monthly budget
+document.getElementById('setBudget')?.addEventListener('click', function() {
+    const budget = parseFloat(document.getElementById('monthlyBudget').value);
+    if (budget > 0) {
+        financialData.monthlyBudget = budget;
+        updateBudgetDisplay();
+        saveData();
+        showToast('Budget updated!', 'success');
+    }
+});
+
+// Update all UI elements
+function updateUI() {
+    updateSummary();
+    updateTransactionList(activeTransactionFilter);
+    updateBudgetDisplay();
+    updateChart();
+}
+
+// Update financial summary
+function updateSummary() {
+    const totalIncome = financialData.transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const totalExpense = financialData.transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const currentBalance = totalIncome - totalExpense;
+    
+    document.getElementById('totalIncome').textContent = `$${totalIncome.toFixed(2)}`;
+    document.getElementById('totalExpense').textContent = `$${totalExpense.toFixed(2)}`;
+    document.getElementById('currentBalance').textContent = `$${currentBalance.toFixed(2)}`;
+}
+
+// Update transaction list with filter support
+function updateTransactionList(filter = 'all') {
+    const list = document.getElementById('transactionsList');
+    let transactions = financialData.transactions;
+    
+    // Apply filter
+    if (filter !== 'all') {
+        transactions = transactions.filter(t => t.type === filter);
+    }
+    
+    if (transactions.length === 0) {
+        list.innerHTML = `<p class="empty-state">No ${filter === 'all' ? '' : filter} transactions yet. Add your first transaction!</p>`;
+        return;
+    }
+    
+    list.innerHTML = transactions.map(transaction => `
+        <div class="transaction-item">
+            <div>
+                <h4>${transaction.description}</h4>
+                <small>${transaction.date} • ${transaction.category}</small>
+            </div>
+            <div class="transaction-type ${transaction.type}">
+                ${transaction.type === 'income' ? '+' : '-'}$${transaction.amount.toFixed(2)}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Update budget display
+function updateBudgetDisplay() {
+    const totalExpense = financialData.transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const remaining = financialData.monthlyBudget - totalExpense;
+    const percentage = Math.min((totalExpense / financialData.monthlyBudget) * 100, 100);
+    
+    document.getElementById('remainingBudget').textContent = `$${remaining.toFixed(2)}`;
+    document.getElementById('budgetProgress').style.width = `${percentage}%`;
+    
+    // Change color based on percentage
+    const progressBar = document.getElementById('budgetProgress');
+    if (percentage > 90) {
+        progressBar.style.background = 'var(--danger)';
+    } else if (percentage > 70) {
+        progressBar.style.background = 'var(--warning)';
+    } else {
+        progressBar.style.background = 'var(--success)';
+    }
+}
+
+// FIXED: Update chart - properly initialized
+function updateChart() {
+    const canvas = document.getElementById('expenseChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Destroy existing chart
+    if (expenseChart) {
+        expenseChart.destroy();
+    }
+    
+    // Prepare data for chart - only expense categories
+    const expenseCategories = ['food', 'transport', 'housing', 'utilities', 'entertainment', 'health', 'shopping', 'other'];
+    const labels = expenseCategories.map(cat => {
+        // Format label nicely
+        return cat.charAt(0).toUpperCase() + cat.slice(1);
+    });
+    
+    const data = expenseCategories.map(cat => financialData.categories[cat] || 0);
+    
+    // Check if there's any data to show
+    const totalExpenses = data.reduce((sum, val) => sum + val, 0);
+    
+    if (totalExpenses === 0) {
+        // Show message instead of empty chart
+        canvas.style.display = 'none';
+        const container = document.querySelector('.chart-container');
+        if (!container.querySelector('.empty-state')) {
+            const message = document.createElement('p');
+            message.className = 'empty-state';
+            message.textContent = 'No expense data yet. Add expenses to see breakdown.';
+            container.appendChild(message);
+        }
+        return;
+    }
+    
+    // Remove any empty state message
+    const emptyState = document.querySelector('.chart-container .empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    canvas.style.display = 'block';
+    
+    // Chart colors
+    const colors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+    ];
+    
+    // Create the chart
+    expenseChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderWidth: 1,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += '$' + context.parsed.toFixed(2);
+                            return label;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+}
+
+// Calculator Functions
+document.getElementById('calculateDebt')?.addEventListener('click', function() {
+    const debt = parseFloat(document.getElementById('debtAmount').value);
+    const monthly = parseFloat(document.getElementById('monthlyPayment').value);
+    const rate = parseFloat(document.getElementById('interestRate').value) / 100 / 12;
+    
+    if (monthly <= debt * rate) {
+        showToast('Monthly payment is too low to cover interest!', 'error');
+        return;
+    }
+    
+    const months = Math.ceil(Math.log(monthly / (monthly - debt * rate)) / Math.log(1 + rate));
+    const totalInterest = (monthly * months) - debt;
+    
+    document.getElementById('debtResult').innerHTML = `
+        <p>Time to payoff: <strong>${months} months (${Math.floor(months/12)} years)</strong></p>
+        <p>Total interest: <strong>$${totalInterest.toFixed(2)}</strong></p>
+    `;
+});
+
+document.getElementById('calculateSavings')?.addEventListener('click', function() {
+    const goal = parseFloat(document.getElementById('goalAmount').value);
+    const monthly = parseFloat(document.getElementById('monthlySavings').value);
+    const current = parseFloat(document.getElementById('currentSavings').value);
+    
+    if (monthly <= 0) {
+        showToast('Please enter a valid monthly savings amount', 'error');
+        return;
+    }
+    
+    const remaining = goal - current;
+    const months = Math.ceil(remaining / monthly);
+    const totalSaved = current + (monthly * months);
+    
+    document.getElementById('savingsResult').innerHTML = `
+        <p>Time to goal: <strong>${months} months (${Math.floor(months/12)} years ${months%12} months)</strong></p>
+        <p>Total saved: <strong>$${totalSaved.toFixed(2)}</strong></p>
+    `;
+});
+
+document.getElementById('calculateMortgage')?.addEventListener('click', function() {
+    const loan = parseFloat(document.getElementById('loanAmount').value);
+    const rate = parseFloat(document.getElementById('mortgageRate').value) / 100 / 12;
+    const term = parseFloat(document.getElementById('loanTerm').value) * 12;
+    
+    const monthly = loan * rate * Math.pow(1 + rate, term) / (Math.pow(1 + rate, term) - 1);
+    const totalInterest = (monthly * term) - loan;
+    
+    document.getElementById('mortgageResult').innerHTML = `
+        <p>Monthly payment: <strong>$${monthly.toFixed(2)}</strong></p>
+        <p>Total interest: <strong>$${totalInterest.toFixed(0)}</strong></p>
+    `;
+});
+
+// Export Data
+document.getElementById('exportBtn')?.addEventListener('click', function() {
+    const dataStr = JSON.stringify(financialData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'finSmart-data.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    showToast('Data exported successfully!', 'success');
+});
+
+// Save data button
+document.getElementById('saveDataBtn')?.addEventListener('click', saveData);
+
+// Clear all data
+document.getElementById('clearData')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+        financialData = {
+            transactions: [],
+            monthlyBudget: 3000,
+            categories: {
+                food: 0,
+                transport: 0,
+                housing: 0,
+                utilities: 0,
+                entertainment: 0,
+                health: 0,
+                shopping: 0,
+                salary: 0,
+                freelance: 0,
+                other: 0
+            }
+        };
+        localStorage.removeItem('finSmartData');
+        activeTransactionFilter = 'all';
+        updateUI();
+        showToast('All data cleared!', 'success');
+    }
+});
+
+// Print report
+document.getElementById('printReport')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    window.print();
+});
+
+// Export CSV
+document.getElementById('exportCSV')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (financialData.transactions.length === 0) {
+        showToast('No data to export', 'error');
+        return;
+    }
+    
+    let csv = 'Date,Type,Category,Amount,Description\n';
+    financialData.transactions.forEach(t => {
+        csv += `${t.date},${t.type},${t.category},${t.amount},${t.description}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'finSmart-transactions.csv';
+    a.click();
+    
+    showToast('CSV exported successfully!', 'success');
+});
+
+// Mobile menu toggle
+document.querySelector('.menu-toggle')?.addEventListener('click', function() {
+    const navLinks = document.querySelector('.nav-links');
+    navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+});
+
+// Transaction filter functionality
+function setupTransactionFilters() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Get filter and update list
+            const filter = this.dataset.filter;
+            activeTransactionFilter = filter;
+            updateTransactionList(filter);
+        });
+    });
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', function() {
+    // Load saved data
+    loadData();
+    
+    // Setup transaction filters
+    setupTransactionFilters();
+    
+    // Add some sample data if empty
+    if (financialData.transactions.length === 0) {
+        const sampleTransactions = [
+            {
+                id: 1,
+                type: 'income',
+                category: 'salary',
+                amount: 3000,
+                description: 'Monthly Salary',
+                date: new Date().toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            },
+            {
+                id: 2,
+                type: 'expense',
+                category: 'housing',
+                amount: 1200,
+                description: 'Rent Payment',
+                date: new Date().toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            },
+            {
+                id: 3,
+                type: 'expense',
+                category: 'food',
+                amount: 350,
+                description: 'Groceries',
+                date: new Date().toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            },
+            {
+                id: 4,
+                type: 'expense',
+                category: 'transport',
+                amount: 120,
+                description: 'Gasoline',
+                date: new Date().toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            }
+        ];
+        
+        financialData.transactions = sampleTransactions;
+        
+        // Calculate initial category totals
+        sampleTransactions.forEach(transaction => {
+            if (transaction.type === 'expense') {
+                financialData.categories[transaction.category] += transaction.amount;
+            }
+        });
+        
+        updateUI();
+        showToast('Sample data loaded. Try adding your own transactions!', 'success');
+    }
+    
+    // Initialize calculators with default values
+    document.getElementById('calculateDebt')?.click();
+    document.getElementById('calculateSavings')?.click();
+    document.getElementById('calculateMortgage')?.click();
+});
+</script>
+</body>
+</html>
